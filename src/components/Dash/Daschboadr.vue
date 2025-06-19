@@ -1,6 +1,6 @@
 <template>
   <div class="w-full" v-if="getData">
-    <div class="w-1/5"><AppSrez /></div>
+    <div class="w-40"><AppSrez /></div>
     <div class="chart"><ContainerChart /></div>
   </div>
   <div v-else class="empty-state">
@@ -46,7 +46,7 @@ function gotoUpload() {
 }
 
 .adm {
-  flex: 0.2;
+  flex: 0.4;
   position: sticky;
   top: 180px;
   align-self: flex-start;

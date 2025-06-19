@@ -37,7 +37,7 @@ header {
   top: 0;
 }
 .hed {
-  margin-top: 1rem;
+  margin-top: 0rem;
   padding: 10px;
   display: flex;
   justify-content: space-around;

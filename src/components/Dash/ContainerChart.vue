@@ -164,19 +164,13 @@ const dataDoneInfl = computed(() => filterDataAgr(agrData.value, "Инфляци
 </script>
 <style scoped>
 .w-fu {
-  display: grid;
-  grid-auto-rows: 400px;
-  gap: 1.5rem 1rem;
-  height: 80vh;
+  display: flex;
+  flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку */
+  gap: 0.3rem;
+  height: 90vh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #4a90e2 #f0f0f0;
-
-  grid-template-areas:
-    "Many Many Many Many Many Many  Row Row Row Zak Zak Zak"
-    "PriceKorz PriceKorz PriceKorz Paccive Paccive Paccive PriceHome PriceHome PriceHome PriceHome PriceHome PriceHome"
-    "Infl Infl Infl Infl Infl Infl Open Open Open Job Job Job"
-    "Vlast Vlast Vlast Vlast Vlast Vlast Prest Prest Prest Prest Prest Prest";
 }
 
 .PriceHome {

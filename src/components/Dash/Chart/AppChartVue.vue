@@ -1,9 +1,18 @@
 <template>
-  <div class="card">
+  <div
+    :class="[
+      'card',
+      chartType === 'pie' || chartType === 'doughnut' ? 'small-chart' : '',
+    ]"
+  >
     <Chart
       :type="chartType"
       :data="chartData"
       :options="chartOptions"
+      :width="chartType === 'pie' || chartType === 'doughnut' ? 160 : undefined"
+      :height="
+        chartType === 'pie' || chartType === 'doughnut' ? 160 : undefined
+      "
       class="w-full h-full"
     />
   </div>
@@ -93,6 +102,7 @@ const chartData = computed(() => {
           borderWidth: 3,
           hoverBorderWidth: 4,
           hoverBackgroundColor: baseColor + "cc",
+          barThickness: 2,
         },
       ],
     };
@@ -128,8 +138,8 @@ const chartOptions = computed(() => ({
       color: "#222",
 
       padding: {
-        top: 10,
-        bottom: 20,
+        top: 5,
+        bottom: 10,
       },
     },
     tooltip: {
@@ -145,7 +155,7 @@ const chartOptions = computed(() => ({
       padding: 10,
       displayColors: false,
       bodyFont: {
-        size: 14,
+        size: 12,
       },
     },
   },
@@ -163,6 +173,8 @@ const chartOptions = computed(() => ({
               },
               color: "#666",
             },
+            categoryPercentage: 0.5,
+            barPercentage: 0.1,
           },
           y: {
             beginAtZero: true,
@@ -194,18 +206,21 @@ const chartOptions = computed(() => ({
 
 <style scoped>
 .card {
-  width: 100%;
-  height: 400px; /* фиксированная высота */
+  width: 300px;
+  height: 300px; /* фиксированная высота */
   margin: 0 auto;
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 8px 20px rgb(0 0 0 / 0.1);
-  position: relative; /* важно для Chart.js */
 }
 
 .chart-canvas {
   width: 100% !important;
   height: 100% !important;
+}
+.small-chart {
+  width: 230px;
+  height: 300px;
 }
 </style>
