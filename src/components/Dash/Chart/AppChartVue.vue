@@ -132,7 +132,7 @@ const chartOptions = computed(() => ({
       display: true,
       text: props.selectedFactor,
       font: {
-        size: 18,
+        size: 15,
         weight: "700",
       },
       color: "#222",
@@ -184,7 +184,7 @@ const chartOptions = computed(() => ({
             },
             ticks: {
               font: {
-                size: 13,
+                size: 10,
               },
               color: "#666",
               stepSize: 1,
@@ -194,7 +194,7 @@ const chartOptions = computed(() => ({
               display: true,
               text: "%",
               font: {
-                size: 14,
+                size: 10,
                 weight: "600",
               },
               color: "#444",
@@ -207,7 +207,7 @@ const chartOptions = computed(() => ({
 <style scoped>
 .card {
   width: 300px;
-  height: 300px; /* фиксированная высота */
+  height: 350px;
   margin: 0 auto;
   background: #fff;
   border-radius: 12px;
@@ -221,6 +221,6 @@ const chartOptions = computed(() => ({
 }
 .small-chart {
   width: 230px;
-  height: 300px;
+  height: 350px;
 }
 </style>

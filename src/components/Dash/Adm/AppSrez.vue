@@ -1,5 +1,5 @@
 <template>
-  <div class="w-3/4">
+  <div>
     <AppSrezYears />
     <AppSrezFO />
   </div>
