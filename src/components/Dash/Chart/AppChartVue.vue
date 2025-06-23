@@ -121,7 +121,7 @@ const chartOptions = computed(() => ({
       position: "bottom",
       labels: {
         font: {
-          size: 14,
+          size: 12,
           weight: "600",
           family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         },
