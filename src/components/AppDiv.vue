@@ -15,7 +15,7 @@
 
 <script setup>
 import { defineProps } from "vue";
-import { VCard, VCardActions, VCardText } from "vuetify/components/VCard";
+
 const props = defineProps({
   title: String,
 });
