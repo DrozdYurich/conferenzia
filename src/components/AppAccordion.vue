@@ -13,7 +13,7 @@ const props = defineProps({
 });
 const storeApp = useApparatStore();
 function onItemSelect(event) {
-  console.log(event.item.label);
+  console.log(event.item.label,'label');
   storeApp.setNameFilter(event.item.label);
 }
 function onItemSelectGroup(event) {
@@ -27,65 +27,83 @@ const items = ref([
     command: onItemSelectGroup,
     items: [
       {
-        label: "Рост З/П",
+        label: "Материальное положение",
         icon: "pi pi-file",
         command: onItemSelect,
       },
       {
-        label: "Рост цен на жилье",
+        label: "Цены на жилье",
         icon: "pi pi-image",
         command: onItemSelect,
       },
       {
-        label: "Рост цены потребительской корзины",
+        label: "Цены на предметы быта и обихода ",
         icon: "pi pi-image",
         command: onItemSelect,
       },
       {
-        label: "Рост рабочих мест",
+        label: "Безработица",
         icon: "pi pi-image",
         command: onItemSelect,
       },
     ],
   },
   {
-    label: "Ацентрические настроения",
+    label: "Абсентеистские настроения",
     command: onItemSelectGroup,
     items: [
       {
-        label: "Рост преступности",
-        command: onItemSelect,
-      },
-      {
-        label: "Рост качества дорог",
+        label: "Акции протеста",
         command: onItemSelect,
       },
     ],
   },
   {
-    label: "Действия властей подрывающие авторитет",
+    label: "Городская среда",
     command: onItemSelectGroup,
     items: [
       {
-        label: "Нарушение законов",
+        label: "Качество дорог",
+        command: onItemSelect,
+      },
+       {
+        label: "ЖКХ",
+        command: onItemSelect,
+      },
+       {
+        label: "Преступность",
         command: onItemSelect,
       },
     ],
   },
   {
-    label: "Невнятность действий",
+    label: "Действия властей, подрывающие авторитет",
     command: onItemSelectGroup,
     items: [
       {
-        label: "Отсутствие открытости действий",
+        label: "Коррупция",
         command: onItemSelect,
       },
       {
-        label: "Противоречивость действий",
+        label: "Бездействие властей",
+        command: onItemSelect,
+      },
+    ],
+  },
+  {
+    label: "Социальная дифференциация",
+    command: onItemSelectGroup,
+    items: [
+      {
+        label: "Социальная структура электората",
         command: onItemSelect,
       },
       {
-        label: "Пассивность",
+        label: "Возрастная структура электората",
+        command: onItemSelect,
+      },
+      {
+        label: "Конфессиональная структура электората",
         command: onItemSelect,
       },
     ],

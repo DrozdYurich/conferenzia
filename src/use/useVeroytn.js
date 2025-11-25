@@ -14,40 +14,51 @@ function calcProtestVer(regionData) {
       const prevValue = regionData[0][prevKey];
       if (currentValue === undefined || prevValue === undefined) return;
       switch (factor.name) {
-        case "Рост З/П": {
+        case "Материальное положение": {
           const inflCurrent = regionData[`Инфляция за ${CURRENT_YEAR} год`];
           if (inflCurrent === undefined) break;
           if (currentValue < inflCurrent) triggered++;
           break;
         }
-        case "Рост цен на жилье": {
-          const zpCurrent = regionData[`Рост З/П за ${CURRENT_YEAR} год`];
+        case "Цены на жилье": {
+          const zpCurrent = regionData[`Материальное положение за ${CURRENT_YEAR} год`];
           if (zpCurrent === undefined) break;
           if (currentValue > zpCurrent) triggered++;
           break;
         }
-        case "Рост цены потребительской корзины":
+        case "Цены на предметы быта и обихода":
           if (currentValue > prevValue) triggered++;
           break;
-        case "Рост рабочих мест":
-          // В вашем описании: увеличение безработных - значит если показатель растёт, индикатор сработал
+        case "Безработица":
           if (currentValue > prevValue) triggered++;
           break;
-        case "Рост преступности":
+        case "Акции протеста":
           if (currentValue > prevValue) triggered++;
           break;
-        case "Рост качества дорог":
+        case "Качество дорог":
           // Падение качества - если показатель снизился, индикатор сработал
           if (currentValue < prevValue) triggered++;
           break;
-        case "Нарушение законов":
+        case "Преступность":
           if (currentValue > 0) triggered++;
           break;
-        case "Отсутствие открытости действий":
-        case "Противоречивость действий":
-        case "Пассивность":
-          // Предполагаем, что значения от 1 до 10, срабатывает при >=5
+        case "ЖКХ":
+          if (currentValue > 0) triggered++;
+          break;
+        case "Коррупция":
+          if (currentValue > 0) triggered++;
+          break;
+        case "Бездействие властей":
           if (currentValue >= 5) triggered++;
+          break;
+        case "Социальная структура электората":
+          if (currentValue >= 20) triggered++;
+          break;
+        case "Возрастная структура электората":
+          if (currentValue >= 20) triggered++;
+          break;
+         case "Конфессиональная структура электората":
+          if (currentValue >= 20) triggered++;
           break;
       }
     });

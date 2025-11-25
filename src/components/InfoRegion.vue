@@ -45,6 +45,8 @@ const nameMenu = computed(() => {
 });
 
 const chartKeysAndValues = computed(() => {
+  console.log(data.value[0],'data.value[0]')
+  console.log(nameMenu.value,'nameMenu.value')
   return useDataKeys(data.value[0], nameMenu.value);
 });
 

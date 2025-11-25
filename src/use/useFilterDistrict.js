@@ -5,6 +5,7 @@ import addProtestVerToAllRegions from "./useVeroytn";
 export default function useFilterDistrict() {
   const res = {};
   const { getData, getKey } = useDataStore();
+  console.log(getData,'getDATA')
   regions.forEach((item) => (item.isCheck = false));
   const copy = getData;
   for (const reg in copy) {

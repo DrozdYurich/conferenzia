@@ -15,7 +15,7 @@ const useApparatStore = defineStore("apparat", () => {
   });
   function setNameFilter(newData) {
     nameFilter.value = newData;
-    console.log(nameFilter);
+    console.log(nameFilter,'filterName');
   }
 
   return { getNameFilter, setNameFilter, setnameGroup, getnameGroup };
