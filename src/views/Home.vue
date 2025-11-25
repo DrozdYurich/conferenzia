@@ -39,5 +39,10 @@ const handleDistrict = async (name) => {
   useFilterDistrict();
 };
 const filtdt = computed(() => getData);
+const activatorProps = ref(false);
 </script>
-<style scoped></style>
+<style scoped>
+.card {
+  margin-top: 10px;
+}
+</style>

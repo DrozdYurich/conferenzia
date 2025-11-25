@@ -21,7 +21,13 @@
 </template>
 <script setup>
 import { useRoute } from "vue-router";
+import { VAppBar, VAppBarTitle } from "vuetify/components/VAppBar";
 const route = useRoute();
+const navItems = [
+  { to: "/punctone", title: "Пункт1" },
+  { to: "/puncttwo", title: "Пункт2" },
+  { to: "/punctthree", title: "Пункт3" },
+];
 </script>
 <style scoped>
 header {

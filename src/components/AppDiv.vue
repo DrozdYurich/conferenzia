@@ -1,15 +1,21 @@
 <template>
-  <div class="all">
-    <div class="h1">
-      <h1>{{ title }}</h1>
+  <v-card class="text-white h-full" color="var(--contentfon)">
+    <div class="flex justify-around">
+      <v-card-title color="red">
+        {{ title }}
+      </v-card-title>
       <slot name="exel" />
     </div>
     <slot name="federal" />
-    <slot />
-  </div>
+    <v-card-text>
+      <slot />
+    </v-card-text>
+  </v-card>
 </template>
+
 <script setup>
 import { defineProps } from "vue";
+import { VCard, VCardActions, VCardText } from "vuetify/components/VCard";
 const props = defineProps({
   title: String,
 });
