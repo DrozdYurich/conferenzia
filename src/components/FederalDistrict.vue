@@ -22,6 +22,7 @@ const props = defineProps({
 
 const emit = defineEmits(["handleDistrict"]);
 const handleDistrict = (name) => {
+  console.log(name, "name");
   emit("handleDistrict", name);
 };
 </script>

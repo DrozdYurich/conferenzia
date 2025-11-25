@@ -2,11 +2,11 @@
   <div class="inf">
     <div class="ff">
       <div class="item">
-        <h2>Информация</h2>
+        <h2>Ситуация в регионе</h2>
         <div class="table">
           <div class="head">
             <span>Cубьект</span>
-            <span>Значение</span>
+            <span>Вероятность</span>
           </div>
           <div
             class="rowtable"
@@ -15,6 +15,7 @@
           >
             <RowTable
               :sub="cityName"
+              :znach="cityData.ver"
               :subValue="cityName"
               :active="activeEl === cityName"
               @hover="handleActiv"

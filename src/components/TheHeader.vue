@@ -1,20 +1,23 @@
 <template>
-  <v-app-bar color="#1d1d1d" class="d-flex">
-    <v-row no-gutters align="center" class="w-100">
-      <v-col cols="2">
-        <RouterLink to="/">Главная</RouterLink>
-      </v-col>
-      <v-spacer color="red lighten-5"></v-spacer>
-    </v-row>
-    <v-btn
-      v-for="item in navItems"
-      :key="item.to"
-      :to="item.to"
-      variant="text"
-      color="white"
-      >{{ item.title }}</v-btn
-    >
-  </v-app-bar>
+  <header>
+    <h1 class="h1">Модуль расчета вероятности протестного голосования</h1>
+
+    <!-- 
+    <div class="two">
+      <router-link to="/puncttwo"><span>Пункт2</span></router-link>
+    </div>
+    <div class="three">
+      <router-link to="/punctthree"><span>Пункт3</span></router-link>
+    </div> -->
+  </header>
+  <div class="hed">
+    <div class="glavn">
+      <router-link to="/"><span>Главная</span></router-link>
+    </div>
+    <div class="one">
+      <router-link to="/punctone"><span>Дашборд</span></router-link>
+    </div>
+  </div>
 </template>
 <script setup>
 import { useRoute } from "vue-router";
@@ -39,7 +42,14 @@ header {
   position: sticky;
   top: 0;
 }
-
+.hed {
+  margin-top: 0rem;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--fonHeadr);
+  font-size: 20px;
+}
 div {
   transition: all 0.4s ease;
   cursor: pointer;
@@ -67,7 +77,8 @@ div {
 .glavn {
   grid-area: glavn;
 }
-div:hover {
+.glavn:hover,
+.one:hover {
   transform: translateY(-5px);
   color: var(--act-dark);
 }

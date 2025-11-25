@@ -20,4 +20,22 @@ const props = defineProps({
   title: String,
 });
 </script>
-<style scoped></style>
+<style scoped>
+.all {
+  margin-top: 10px;
+  background-color: var(--contentfon);
+  padding: 20px;
+  border-radius: 5px; /* Добавляет скругленные углы */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  height: 750px;
+}
+h1 {
+  text-align: center;
+  font-size: 25px;
+  color: var(--content-color);
+}
+.h1 {
+  display: flex;
+  justify-content: space-around;
+}
+</style>

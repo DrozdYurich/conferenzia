@@ -17,13 +17,34 @@ import { VAppBar, VAppBarTitle } from "vuetify/components/VAppBar";
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.4s ease;
+.fade-enter-active {
+  animation: in 0.4s ease;
 }
-
+.fade-leave-active {
+  animation: out 0.4s ease;
+}
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px); /* Изменил направление для лучшего эффекта */
+  }
 }
 </style>

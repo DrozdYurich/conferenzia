@@ -9,10 +9,11 @@ export default function useFileUpload() {
   const errorMsg = ref(null);
   const headers = ref([]);
   const cities = ref([]);
-  const data = {};
+  const data = ref({});
 
   const handleFile = async (file) => {
     data.value = {};
+    console.log(data,'DATA1111111111111')
     isLoading.value = true;
     errorMsg.value = null;
     try {
@@ -25,8 +26,11 @@ export default function useFileUpload() {
         throw new Error("Файл не содержит листов");
       }
       const firstSheetName = workbook.SheetNames[0];
+      
       const worksheet = workbook.Sheets[firstSheetName];
+      
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+     
       if (jsonData.length === 0) {
         throw new Error("Нет данных в файле");
       }
@@ -35,9 +39,12 @@ export default function useFileUpload() {
         throw new Error("Нет данных для обработки");
       }
       cities.value = jsonData.slice(1).map((row) => row[0]);
+
       const result = {};
+        console.log(result,'RESULT')
       jsonData.slice(1).forEach((row) => {
         const cityName = row[0];
+             
         if (!result[cityName]) {
           result[cityName] = [];
         }
@@ -45,14 +52,20 @@ export default function useFileUpload() {
 
         for (let i = 1; i < headers.value.length; i++) {
           const header = headers.value[i];
+           
           indicators[header] = row[i] || null;
+         
         }
+       
+
         result[cityName].push(indicators);
+         
       });
 
       data.value = result;
       // console.log(useAddDistrict(data));
       dataStore.sentFilterKey();
+
       dataStore.loadData(useAddDistrict(data));
     } catch (error) {
       console.error("Ошибка при загрузке данных:", error);

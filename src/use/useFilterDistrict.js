@@ -1,9 +1,11 @@
 import useDataStore from "@/store/useDataStore";
 import regions from "@/utils/region";
 import { storeToRefs } from "pinia";
+import addProtestVerToAllRegions from "./useVeroytn";
 export default function useFilterDistrict() {
   const res = {};
   const { getData, getKey } = useDataStore();
+  console.log(getData,'getDATA')
   regions.forEach((item) => (item.isCheck = false));
   const copy = getData;
   for (const reg in copy) {
@@ -17,6 +19,7 @@ export default function useFilterDistrict() {
       }
     }
   }
-  console.log(res);
-  return res;
+  const rs = addProtestVerToAllRegions(res);
+  console.log(rs, "rs");
+  return rs;
 }

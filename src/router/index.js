@@ -28,7 +28,7 @@ const router = createRouter({
     },
     {
       path: "/punctone",
-      name: "punctone",
+      name: "dashbord",
       component: PunctOne,
     },
     {

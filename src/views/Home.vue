@@ -25,9 +25,6 @@ import useDataStore from "@/store/useDataStore";
 import { computed, provide, reactive, ref } from "vue";
 import { storeToRefs } from "pinia";
 import useFilterDistrict from "@/use/useFilterDistrict";
-import { VBottomSheet } from "vuetify/components/VBottomSheet";
-import { VCard, VCardActions } from "vuetify/components/VCard";
-import { VBtn } from "vuetify/components/VBtn";
 
 const dataStore = useDataStore();
 const { data, errorMsg, handleFile, isLoading } = useFileUpload();

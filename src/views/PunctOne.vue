@@ -1,6 +1,8 @@
-<template></template>
+<template>
+  <div class="w-full">
+    <Daschboadr />
+  </div>
+</template>
 <script setup>
-import { ref } from "vue";
-const email = ref();
+import Daschboadr from "@/components/Dash/Daschboadr.vue";
 </script>
-<style scoped></style>

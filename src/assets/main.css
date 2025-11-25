@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@import "tailwindcss-primeui";
 :root {
   --head-color: #ffffff;
   --content-color: #e0e0e0;
