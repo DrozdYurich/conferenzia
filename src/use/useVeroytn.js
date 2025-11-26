@@ -2,69 +2,433 @@ import apparat from "@/data/apparat";
 
 const CURRENT_YEAR = 2024;
 const PREV_YEAR = CURRENT_YEAR - 1;
-function calcProtestVer(regionData) {
-  let totalFactors = 0;
-  let triggered = 0;
-  apparat.forEach((group) => {
-    group.factors.forEach((factor) => {
-      totalFactors++;
-      const currentKey = `${factor.name} за ${CURRENT_YEAR} год`;
-      const prevKey = `${factor.name} за ${PREV_YEAR} год`;
-      const currentValue = regionData[0][currentKey];
-      const prevValue = regionData[0][prevKey];
-      if (currentValue === undefined || prevValue === undefined) return;
-      switch (factor.name) {
-        case "Материальное положение": {
-          const inflCurrent = regionData[`Инфляция за ${CURRENT_YEAR} год`];
-          if (inflCurrent === undefined) break;
-          if (currentValue < inflCurrent) triggered++;
-          break;
-        }
-        case "Цены на жилье": {
-          const zpCurrent = regionData[`Материальное положение за ${CURRENT_YEAR} год`];
-          if (zpCurrent === undefined) break;
-          if (currentValue > zpCurrent) triggered++;
-          break;
-        }
-        case "Цены на предметы быта и обихода":
-          if (currentValue > prevValue) triggered++;
-          break;
-        case "Безработица":
-          if (currentValue > prevValue) triggered++;
-          break;
-        case "Акции протеста":
-          if (currentValue > prevValue) triggered++;
-          break;
-        case "Качество дорог":
-          // Падение качества - если показатель снизился, индикатор сработал
-          if (currentValue < prevValue) triggered++;
-          break;
-        case "Преступность":
-          if (currentValue > 0) triggered++;
-          break;
-        case "ЖКХ":
-          if (currentValue > 0) triggered++;
-          break;
-        case "Коррупция":
-          if (currentValue > 0) triggered++;
-          break;
-        case "Бездействие властей":
-          if (currentValue >= 5) triggered++;
-          break;
-        case "Социальная структура электората":
-          if (currentValue >= 20) triggered++;
-          break;
-        case "Возрастная структура электората":
-          if (currentValue >= 20) triggered++;
-          break;
-         case "Конфессиональная структура электората":
-          if (currentValue >= 20) triggered++;
-          break;
-      }
+
+// Вспомогательные функции для расчетов
+function calculateAverage(values) {
+  if (!values.length) return 0;
+  return values.reduce((sum, val) => sum + val, 0) / values.length;
+}
+
+// function calculateGroupProbability(factors, regionData) {
+//   console.log(regionData,'regionData')
+//   let totalFactors = factors.length;
+//   let triggeredFactors = 0;
+
+//   factors.forEach((factor) => {
+//     const currentKey = `${factor.name} за ${CURRENT_YEAR} год`;
+//     const prevKey = `${factor.name} за ${PREV_YEAR} год`;
+//     const currentValue = regionData[0][currentKey];
+//     const prevValue = regionData[0][prevKey];
+
+//     if (currentValue === undefined || prevValue === undefined) return;
+
+//     let isTriggered = false;
+ 
+//     switch (factor.name) {
+//       // Экономическая детерминация
+//       case "Материальное положение": {
+//         const inflCurrent = regionData[0][`Инфляция за ${CURRENT_YEAR} год`];
+//         if (inflCurrent === undefined) break;
+//         // Зарплата выросла менее чем на уровень инфляции
+//         isTriggered = currentValue < inflCurrent;
+//         console.log(isTriggered,'isTriggered')
+//         break;
+//       }
+//       case "Цены на жилье": {
+//         const incomeCurrent = regionData[0][`Материальное положение за ${CURRENT_YEAR} год`];
+//         if (incomeCurrent === undefined) break;
+//         // Рост цен на жилье превышает рост доходов
+//         isTriggered = currentValue > incomeCurrent;
+//         console.log(isTriggered,'isTriggered')
+//         break;
+//       }
+//       case "Цены на предметы быта и обихода": {
+//         // Нужны данные за предыдущие 3 года для сравнения
+//         const prevYear2 = CURRENT_YEAR - 2;
+//         const prevYear3 = CURRENT_YEAR - 3;
+//         const keyPrev2 = `${factor.name} за ${prevYear2} год`;
+//         const keyPrev3 = `${factor.name} за ${prevYear3} год`;
+//         const valuePrev2 = regionData[0][keyPrev2];
+//         const valuePrev3 = regionData[0][keyPrev3];
+        
+//         if (valuePrev2 !== undefined && valuePrev3 !== undefined) {
+//           const avgPrevYears = calculateAverage([prevValue, valuePrev2, valuePrev3]);
+//           isTriggered = currentValue > avgPrevYears;
+//         } else {
+//           // Если данных нет, используем простое сравнение
+//           isTriggered = currentValue > prevValue;
+//         }
+//         break;
+//       }
+//       case "Безработица": {
+//         // Нужны данные за предыдущие 5 лет
+//         const prevYears = [PREV_YEAR];
+//         for (let i = 2; i <= 5; i++) {
+//           prevYears.push(CURRENT_YEAR - i);
+//         }
+        
+//         const prevValues = prevYears
+//           .map(year => regionData[0][`${factor.name} за ${year} год`])
+//           .filter(val => val !== undefined);
+        
+//         if (prevValues.length > 0) {
+//           const avgPrevUnemployment = calculateAverage(prevValues);
+//           isTriggered = currentValue > avgPrevUnemployment + 1; // Превышение на 1%
+//         } else {
+//           isTriggered = currentValue > prevValue;
+//         }
+//         break;
+//       }
+
+//       // Абсентеистские настроения
+//       case "Акции протеста":
+//         // Хотя бы одна акция с более чем 100 участниками
+//         isTriggered = currentValue >= 1;
+//         break;
+
+//       // Городская среда
+//       case "Качество дорог": {
+//         // Нужны данные за предыдущие 3 года
+//         const prevYear2 = CURRENT_YEAR - 2;
+//         const prevYear3 = CURRENT_YEAR - 3;
+//         const keyPrev2 = `${factor.name} за ${prevYear2} год`;
+//         const keyPrev3 = `${factor.name} за ${prevYear3} год`;
+//         const valuePrev2 = regionData[0][keyPrev2];
+//         const valuePrev3 = regionData[0][keyPrev3];
+        
+//         if (valuePrev2 !== undefined && valuePrev3 !== undefined) {
+//           const avgPrevYears = calculateAverage([prevValue, valuePrev2, valuePrev3]);
+//           // Снижение скорости на 5% и более
+//           isTriggered = currentValue < avgPrevYears * 0.95;
+//         } else {
+//           isTriggered = currentValue < prevValue;
+//         }
+//         break;
+//       }
+//       case "ЖКХ": {
+//         const incomeGrowth = regionData[0][`Материальное положение за ${CURRENT_YEAR} год`];
+//         if (incomeGrowth === undefined) break;
+//         // Тарифы выросли больше чем зарплата
+//         isTriggered = currentValue > incomeGrowth;
+//         break;
+//       }
+//       case "Преступность": {
+//         // Нужны данные за предыдущие 3 года
+//         const prevYear2 = CURRENT_YEAR - 2;
+//         const prevYear3 = CURRENT_YEAR - 3;
+//         const keyPrev2 = `${factor.name} за ${prevYear2} год`;
+//         const keyPrev3 = `${factor.name} за ${prevYear3} год`;
+//         const valuePrev2 = regionData[0][keyPrev2];
+//         const valuePrev3 = regionData[0][keyPrev3];
+        
+//         if (valuePrev2 !== undefined && valuePrev3 !== undefined) {
+//           const avgPrevYears = calculateAverage([prevValue, valuePrev2, valuePrev3]);
+//           // Рост преступности более чем на 5%
+//           isTriggered = currentValue > avgPrevYears * 1.05;
+//         } else {
+//           isTriggered = currentValue > prevValue;
+//         }
+//         break;
+//       }
+
+//       // Действия властей, подрывающие авторитет
+//       case "Коррупция":
+//         // Высокий уровень недовольства (значения больше 0 указывают на проблемы)
+//         isTriggered = currentValue > 0;
+//         break;
+//       case "Бездействие властей":
+//         // Превышение жалоб на 20% относительно предыдущего периода
+//         isTriggered = currentValue >= prevValue * 1.2;
+//         break;
+
+//       // Социальная дифференциация
+//       case "Социальная структура электората":
+//         // Рост коэффициента Джини более чем на 0.05
+//         isTriggered = (currentValue - prevValue) > 0.05;
+//         break;
+//       case "Возрастная структура электората":
+//         // Рост доли молодежи более чем на 5%
+//         isTriggered = (currentValue - prevValue) > 5;
+//         break;
+//       case "Конфессиональная структура электората":
+//         // Рост конфликтов на 10%
+//         isTriggered = (currentValue - prevValue) > 10;
+//         break;
+//     }
+
+//     if (isTriggered) {
+//       triggeredFactors++;
+//     }
+//   });
+
+//   return totalFactors > 0 ? triggeredFactors / totalFactors : 0;
+// }
+function createProtestGroups() {
+  const groups = {
+    "Экономическая детерминация": [
+      "Материальное положение",
+      "Цены на жилье", 
+      "Цены на предметы быта и обихода",
+      "Безработица"
+    ],
+    "Абсентеистские настроения": [
+      "Акции протеста"
+    ],
+    "Городская среда": [
+      "Качество дорог",
+      "ЖКХ",
+      "Преступность"
+    ],
+    "Действия властей, подрывающие авторитет": [
+      "Коррупция",
+      "Бездействие властей"
+    ],
+    "Социальная дифференциация": [
+      "Социальная структура электората",
+      "Возрастная структура электората", 
+      "Конфессиональная структура электората"
+    ]
+  };
+
+  return groups;
+}
+
+// Функция для получения данных по группам из вашего объекта
+function calculateGroupProbability(factors, regionData) {
+  let totalFactors = factors.length;
+  let triggeredFactors = 0;
+
+  console.log(`\nРасчет для группы с ${totalFactors} факторами:`, factors);
+
+  factors.forEach((factor) => {
+    const currentKey = `${factor} за ${CURRENT_YEAR} год`;
+    const prevKey = `${factor} за ${PREV_YEAR} год`;
+    
+    // Исправлено: обращаемся напрямую к regionData[0], так как это объект с данными
+    const currentValue = regionData[0][currentKey];
+    const prevValue = regionData[0][prevKey];
+
+    console.log(`Фактор "${factor}":`, { 
+      currentKey, 
+      prevKey, 
+      currentValue, 
+      prevValue,
+      hasCurrent: currentValue !== undefined,
+      hasPrev: prevValue !== undefined
     });
+
+    if (currentValue === undefined || prevValue === undefined) {
+      console.log(`❌ Пропуск фактора "${factor}" - отсутствуют данные`);
+      return;
+    }
+
+    let isTriggered = false;
+
+    // Приводим значения к числам (на случай строковых значений как "1.4")
+    const current = parseFloat(currentValue);
+    const prev = parseFloat(prevValue);
+
+    switch (factor) {
+      // Экономическая детерминация
+      case "Материальное положение": {
+        const inflCurrent = parseFloat(regionData[0][`Инфляция за ${CURRENT_YEAR} год`]);
+        if (isNaN(inflCurrent)) {
+          console.log(`❌ Пропуск "${factor}" - нет данных по инфляции`);
+          break;
+        }
+        // Зарплата выросла менее чем на уровень инфляции
+        isTriggered = current < inflCurrent;
+        console.log(`💰 "${factor}": ${current} < ${inflCurrent} = ${isTriggered}`);
+        break;
+      }
+      case "Цены на жилье": {
+        const incomeCurrent = parseFloat(regionData[0][`Материальное положение за ${CURRENT_YEAR} год`]);
+        if (isNaN(incomeCurrent)) {
+          console.log(`❌ Пропуск "${factor}" - нет данных по доходам`);
+          break;
+        }
+        // Рост цен на жилье превышает рост доходов
+        isTriggered = current > incomeCurrent;
+        console.log(`🏠 "${factor}": ${current} > ${incomeCurrent} = ${isTriggered}`);
+        break;
+      }
+      case "Цены на предметы быта и обихода": {
+        // Нужны данные за предыдущие 3 года для сравнения
+        const prevYear2 = CURRENT_YEAR - 2;
+        const prevYear3 = CURRENT_YEAR - 3;
+        const keyPrev2 = `${factor} за ${prevYear2} год`;
+        const keyPrev3 = `${factor} за ${prevYear3} год`;
+        const valuePrev2 = parseFloat(regionData[0][keyPrev2]);
+        const valuePrev3 = parseFloat(regionData[0][keyPrev3]);
+        
+        if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
+          const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
+          isTriggered = current > avgPrevYears;
+          console.log(`🛒 "${factor}": ${current} > ${avgPrevYears} (среднее) = ${isTriggered}`);
+        } else {
+          // Если данных нет, используем простое сравнение
+          isTriggered = current > prev;
+          console.log(`🛒 "${factor}": ${current} > ${prev} = ${isTriggered}`);
+        }
+        break;
+      }
+      case "Безработица": {
+        // Нужны данные за предыдущие 5 лет
+        const prevYears = [PREV_YEAR];
+        for (let i = 2; i <= 5; i++) {
+          prevYears.push(CURRENT_YEAR - i);
+        }
+        
+        const prevValues = prevYears
+          .map(year => parseFloat(regionData[0][`${factor} за ${year} год`]))
+          .filter(val => !isNaN(val));
+        
+        if (prevValues.length > 0) {
+          const avgPrevUnemployment = calculateAverage(prevValues);
+          isTriggered = current > avgPrevUnemployment + 1; // Превышение на 1%
+          console.log(`👔 "${factor}": ${current} > ${avgPrevUnemployment} + 1 = ${isTriggered}`);
+        } else {
+          isTriggered = current > prev;
+          console.log(`👔 "${factor}": ${current} > ${prev} = ${isTriggered}`);
+        }
+        break;
+      }
+
+      // Абсентеистские настроения
+      case "Акции протеста":
+        // Хотя бы одна акция
+        isTriggered = current >= 1;
+        console.log(`📢 "${factor}": ${current} >= 1 = ${isTriggered}`);
+        break;
+
+      // Городская среда
+      case "Качество дорог": {
+        // Нужны данные за предыдущие 3 года
+        const prevYear2 = CURRENT_YEAR - 2;
+        const prevYear3 = CURRENT_YEAR - 3;
+        const keyPrev2 = `${factor} за ${prevYear2} год`;
+        const keyPrev3 = `${factor} за ${prevYear3} год`;
+        const valuePrev2 = parseFloat(regionData[0][keyPrev2]);
+        const valuePrev3 = parseFloat(regionData[0][keyPrev3]);
+        
+        if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
+          const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
+          // Снижение качества на 5% и более
+          isTriggered = current < avgPrevYears * 0.95;
+          console.log(`🛣️ "${factor}": ${current} < ${avgPrevYears} * 0.95 = ${isTriggered}`);
+        } else {
+          isTriggered = current < prev;
+          console.log(`🛣️ "${factor}": ${current} < ${prev} = ${isTriggered}`);
+        }
+        break;
+      }
+      case "ЖКХ": {
+        const incomeGrowth = parseFloat(regionData[0][`Материальное положение за ${CURRENT_YEAR} год`]);
+        if (isNaN(incomeGrowth)) {
+          console.log(`❌ Пропуск "${factor}" - нет данных по доходам`);
+          break;
+        }
+        // Тарифы выросли больше чем зарплата
+        isTriggered = current > incomeGrowth;
+        console.log(`🏘️ "${factor}": ${current} > ${incomeGrowth} = ${isTriggered}`);
+        break;
+      }
+      case "Преступность": {
+        // Нужны данные за предыдущие 3 года
+        const prevYear2 = CURRENT_YEAR - 2;
+        const prevYear3 = CURRENT_YEAR - 3;
+        const keyPrev2 = `${factor} за ${prevYear2} год`;
+        const keyPrev3 = `${factor} за ${prevYear3} год`;
+        const valuePrev2 = parseFloat(regionData[0][keyPrev2]);
+        const valuePrev3 = parseFloat(regionData[0][keyPrev3]);
+        
+        if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
+          const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
+          // Рост преступности более чем на 5%
+          isTriggered = current > avgPrevYears * 1.05;
+          console.log(`🚔 "${factor}": ${current} > ${avgPrevYears} * 1.05 = ${isTriggered}`);
+        } else {
+          isTriggered = current > prev;
+          console.log(`🚔 "${factor}": ${current} > ${prev} = ${isTriggered}`);
+        }
+        break;
+      }
+
+      // Действия властей, подрывающие авторитет
+      case "Коррупция":
+        // Высокий уровень недовольства
+        isTriggered = current > 0;
+        console.log(`💰 "${factor}": ${current} > 0 = ${isTriggered}`);
+        break;
+      case "Бездействие властей":
+        // Превышение жалоб на 20% относительно предыдущего периода
+        isTriggered = current >= prev * 1.2;
+        console.log(`🏛️ "${factor}": ${current} >= ${prev} * 1.2 = ${isTriggered}`);
+        break;
+
+      // Социальная дифференциация
+      case "Социальная структура электората":
+        // Рост коэффициента Джини более чем на 0.05
+        isTriggered = (current - prev) > 0.05;
+        console.log(`📊 "${factor}": ${current} - ${prev} > 0.05 = ${isTriggered}`);
+        break;
+      case "Возрастная структура электората":
+        // Рост доли молодежи более чем на 5%
+        isTriggered = (current - prev) > 5;
+        console.log(`👥 "${factor}": ${current} - ${prev} > 5 = ${isTriggered}`);
+        break;
+      case "Конфессиональная структура электората":
+        // Рост конфликтов на 10%
+        isTriggered = (current - prev) > 10;
+        console.log(`🕌 "${factor}": ${current} - ${prev} > 10 = ${isTriggered}`);
+        break;
+    }
+
+    if (isTriggered) {
+      triggeredFactors++;
+      console.log(`✅ Фактор "${factor}" СРАБОТАЛ!`);
+    } else {
+      console.log(`❌ Фактор "${factor}" не сработал`);
+    }
   });
 
-  return totalFactors ? Math.round((triggered / totalFactors) * 100) / 100 : 0;
+  const groupProbability = totalFactors > 0 ? triggeredFactors / totalFactors : 0;
+  console.log(`🎯 Итог по группе: ${triggeredFactors}/${totalFactors} = ${groupProbability}`);
+  
+  return groupProbability;
+}
+function calcProtestVer(regionData) {
+  
+  
+  // Группируем факторы по категориям
+  const groups = createProtestGroups();;
+
+
+
+  // Рассчитываем вероятность для каждой группы
+  const groupProbabilities = {};
+  Object.entries(groups).forEach(([category, factors]) => {
+    const probability = calculateGroupProbability(factors, regionData);
+    groupProbabilities[category] = probability;
+    console.log(`Вероятность для группы "${category}":`, probability);
+  });
+
+  // Применяем формулу полной вероятности для независимых событий
+  // P(Протест) = 1 - ∏(1 - P(A_i))
+  let probabilityNoProtest = 1;
+
+  Object.values(groupProbabilities).forEach(groupProb => {
+    probabilityNoProtest *= (1 - groupProb);
+    console.log('probabilityNoProtest',probabilityNoProtest)
+  });
+
+  const finalProbability = 1 - probabilityNoProtest;
+
+  console.log('Вероятности по группам:', groupProbabilities);
+  console.log('Итоговая вероятность протеста:', finalProbability);
+
+  // Округляем до 2 знаков после запятой
+  return Math.round(finalProbability * 100) / 100;
 }
 
 function addProtestVerToAllRegions(regionsData) {
