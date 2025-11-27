@@ -5,7 +5,7 @@ import App from "./App.vue";
 import router from "./router";
 import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
-import Ripple from "primevue/ripple";
+
 const app = createApp(App);
 const pinia = createPinia();
 app.use(pinia);
@@ -20,5 +20,5 @@ app.use(PrimeVue, {
     },
   },
 });
-app.directive("ripple", Ripple);
+
 app.mount("#app");
