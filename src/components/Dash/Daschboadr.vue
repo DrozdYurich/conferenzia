@@ -38,7 +38,7 @@ function gotoUpload() {
 </script>
 <style scoped>
 .w-full {
-  width: 95%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -46,7 +46,7 @@ function gotoUpload() {
 }
 
 .adm {
-  width: 400px;
+  width: 550px;
 }
 .chart {
   display: flex;
