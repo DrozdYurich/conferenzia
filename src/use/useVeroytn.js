@@ -1,5 +1,6 @@
 import apparat from "@/data/apparat";
 import useDataStoreVer from "@/store/useDataVeroyatn";
+
 const CURRENT_YEAR = 2024;
 const PREV_YEAR = CURRENT_YEAR - 1;
 
@@ -43,6 +44,9 @@ function createProtestGroups() {
 function calculateGroupProbability(factors, regionData) {
   let totalFactors = factors.length;
   let triggeredFactors = 0;
+  
+  // Объект для хранения информации по каждому фактору
+  const factorsData = {};
 
   console.log(`\nРасчет для группы с ${totalFactors} факторами:`, factors);
 
@@ -50,7 +54,6 @@ function calculateGroupProbability(factors, regionData) {
     const currentKey = `${factor} за ${CURRENT_YEAR} год`;
     const prevKey = `${factor} за ${PREV_YEAR} год`;
     
-    // Исправлено: обращаемся напрямую к regionData[0], так как это объект с данными
     const currentValue = regionData[0][currentKey];
     const prevValue = regionData[0][prevKey];
 
@@ -65,12 +68,18 @@ function calculateGroupProbability(factors, regionData) {
 
     if (currentValue === undefined || prevValue === undefined) {
       console.log(`❌ Пропуск фактора "${factor}" - отсутствуют данные`);
+      factorsData[factor] = {
+        triggered: false,
+        value: 0,
+        reason: 'Отсутствуют данные',
+        currentValue: null,
+        prevValue: null
+      };
       return;
     }
 
     let isTriggered = false;
-
-    // Приводим значения к числам (на случай строковых значений как "1.4")
+    let triggerReason = '';
     const current = parseFloat(currentValue);
     const prev = parseFloat(prevValue);
 
@@ -79,27 +88,26 @@ function calculateGroupProbability(factors, regionData) {
       case "Материальное положение": {
         const inflCurrent = parseFloat(regionData[0][`Инфляция за ${CURRENT_YEAR} год`]);
         if (isNaN(inflCurrent)) {
-          console.log(`❌ Пропуск "${factor}" - нет данных по инфляции`);
+          triggerReason = 'Нет данных по инфляции';
           break;
         }
-        // Зарплата выросла менее чем на уровень инфляции
         isTriggered = current < inflCurrent;
+        triggerReason = `Зарплата (${current}%) < Инфляция (${inflCurrent}%)`;
         console.log(`💰 "${factor}": ${current} < ${inflCurrent} = ${isTriggered}`);
         break;
       }
       case "Цены на жилье": {
         const incomeCurrent = parseFloat(regionData[0][`Материальное положение за ${CURRENT_YEAR} год`]);
         if (isNaN(incomeCurrent)) {
-          console.log(`❌ Пропуск "${factor}" - нет данных по доходам`);
+          triggerReason = 'Нет данных по доходам';
           break;
         }
-        // Рост цен на жилье превышает рост доходов
         isTriggered = current > incomeCurrent;
+        triggerReason = `Цены на жилье (${current}%) > Рост доходов (${incomeCurrent}%)`;
         console.log(`🏠 "${factor}": ${current} > ${incomeCurrent} = ${isTriggered}`);
         break;
       }
       case "Цены на предметы быта и обихода": {
-        // Нужны данные за предыдущие 3 года для сравнения
         const prevYear2 = CURRENT_YEAR - 2;
         const prevYear3 = CURRENT_YEAR - 3;
         const keyPrev2 = `${factor} за ${prevYear2} год`;
@@ -110,16 +118,16 @@ function calculateGroupProbability(factors, regionData) {
         if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
           const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
           isTriggered = current > avgPrevYears;
+          triggerReason = `Текущий рост (${current}%) > Средний за 3 года (${avgPrevYears.toFixed(2)}%)`;
           console.log(`🛒 "${factor}": ${current} > ${avgPrevYears} (среднее) = ${isTriggered}`);
         } else {
-          // Если данных нет, используем простое сравнение
           isTriggered = current > prev;
+          triggerReason = `Текущий рост (${current}%) > Прошлый год (${prev}%)`;
           console.log(`🛒 "${factor}": ${current} > ${prev} = ${isTriggered}`);
         }
         break;
       }
       case "Безработица": {
-        // Нужны данные за предыдущие 5 лет
         const prevYears = [PREV_YEAR];
         for (let i = 2; i <= 5; i++) {
           prevYears.push(CURRENT_YEAR - i);
@@ -131,10 +139,12 @@ function calculateGroupProbability(factors, regionData) {
         
         if (prevValues.length > 0) {
           const avgPrevUnemployment = calculateAverage(prevValues);
-          isTriggered = current > avgPrevUnemployment + 1; // Превышение на 1%
+          isTriggered = current > avgPrevUnemployment + 1;
+          triggerReason = `Текущий уровень (${current}%) > Средний за 5 лет (${avgPrevUnemployment.toFixed(2)}%) + 1%`;
           console.log(`👔 "${factor}": ${current} > ${avgPrevUnemployment} + 1 = ${isTriggered}`);
         } else {
           isTriggered = current > prev;
+          triggerReason = `Текущий уровень (${current}%) > Прошлый год (${prev}%)`;
           console.log(`👔 "${factor}": ${current} > ${prev} = ${isTriggered}`);
         }
         break;
@@ -142,14 +152,13 @@ function calculateGroupProbability(factors, regionData) {
 
       // Абсентеистские настроения
       case "Акции протеста":
-        // Хотя бы одна акция
-        isTriggered = current >= 1;
+        isTriggered = current >= 10;
+        triggerReason = `Количество акций: ${current}`;
         console.log(`📢 "${factor}": ${current} >= 1 = ${isTriggered}`);
         break;
 
       // Городская среда
       case "Качество дорог": {
-        // Нужны данные за предыдущие 3 года
         const prevYear2 = CURRENT_YEAR - 2;
         const prevYear3 = CURRENT_YEAR - 3;
         const keyPrev2 = `${factor} за ${prevYear2} год`;
@@ -159,11 +168,12 @@ function calculateGroupProbability(factors, regionData) {
         
         if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
           const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
-          // Снижение качества на 5% и более
           isTriggered = current < avgPrevYears * 0.95;
+          triggerReason = `Текущий уровень (${current}%) < Средний за 3 года (${avgPrevYears.toFixed(2)}%) * 95%`;
           console.log(`🛣️ "${factor}": ${current} < ${avgPrevYears} * 0.95 = ${isTriggered}`);
         } else {
           isTriggered = current < prev;
+          triggerReason = `Текущий уровень (${current}%) < Прошлый год (${prev}%)`;
           console.log(`🛣️ "${factor}": ${current} < ${prev} = ${isTriggered}`);
         }
         break;
@@ -171,16 +181,15 @@ function calculateGroupProbability(factors, regionData) {
       case "ЖКХ": {
         const incomeGrowth = parseFloat(regionData[0][`Материальное положение за ${CURRENT_YEAR} год`]);
         if (isNaN(incomeGrowth)) {
-          console.log(`❌ Пропуск "${factor}" - нет данных по доходам`);
+          triggerReason = 'Нет данных по доходам';
           break;
         }
-        // Тарифы выросли больше чем зарплата
         isTriggered = current > incomeGrowth;
+        triggerReason = `Рост тарифов (${current}%) > Рост доходов (${incomeGrowth}%)`;
         console.log(`🏘️ "${factor}": ${current} > ${incomeGrowth} = ${isTriggered}`);
         break;
       }
       case "Преступность": {
-        // Нужны данные за предыдущие 3 года
         const prevYear2 = CURRENT_YEAR - 2;
         const prevYear3 = CURRENT_YEAR - 3;
         const keyPrev2 = `${factor} за ${prevYear2} год`;
@@ -190,11 +199,12 @@ function calculateGroupProbability(factors, regionData) {
         
         if (!isNaN(valuePrev2) && !isNaN(valuePrev3)) {
           const avgPrevYears = calculateAverage([prev, valuePrev2, valuePrev3]);
-          // Рост преступности более чем на 5%
           isTriggered = current > avgPrevYears * 1.05;
+          triggerReason = `Текущий уровень (${current}%) > Средний за 3 года (${avgPrevYears.toFixed(2)}%) * 105%`;
           console.log(`🚔 "${factor}": ${current} > ${avgPrevYears} * 1.05 = ${isTriggered}`);
         } else {
           isTriggered = current > prev;
+          triggerReason = `Текущий уровень (${current}%) > Прошлый год (${prev}%)`;
           console.log(`🚔 "${factor}": ${current} > ${prev} = ${isTriggered}`);
         }
         break;
@@ -202,30 +212,30 @@ function calculateGroupProbability(factors, regionData) {
 
       // Действия властей, подрывающие авторитет
       case "Коррупция":
-        // Высокий уровень недовольства
         isTriggered = current > 0;
+        triggerReason = `Уровень недовольства: ${current}`;
         console.log(`💰 "${factor}": ${current} > 0 = ${isTriggered}`);
         break;
       case "Бездействие властей":
-        // Превышение жалоб на 20% относительно предыдущего периода
         isTriggered = current >= prev * 1.2;
+        triggerReason = `Текущие жалобы (${current}) >= ${prev} * 120%`;
         console.log(`🏛️ "${factor}": ${current} >= ${prev} * 1.2 = ${isTriggered}`);
         break;
 
       // Социальная дифференциация
       case "Социальная структура электората":
-        // Рост коэффициента Джини более чем на 0.05
         isTriggered = (current - prev) > 0.05;
+        triggerReason = `Рост коэффициента Джини: ${(current - prev).toFixed(3)} > 0.05`;
         console.log(`📊 "${factor}": ${current} - ${prev} > 0.05 = ${isTriggered}`);
         break;
       case "Возрастная структура электората":
-        // Рост доли молодежи более чем на 5%
         isTriggered = (current - prev) > 5;
+        triggerReason = `Рост доли молодежи: ${(current - prev).toFixed(2)}% > 5%`;
         console.log(`👥 "${factor}": ${current} - ${prev} > 5 = ${isTriggered}`);
         break;
       case "Конфессиональная структура электората":
-        // Рост конфликтов на 10%
         isTriggered = (current - prev) > 10;
+        triggerReason = `Рост конфликтов: ${(current - prev).toFixed(2)}% > 10%`;
         console.log(`🕌 "${factor}": ${current} - ${prev} > 10 = ${isTriggered}`);
         break;
     }
@@ -236,48 +246,86 @@ function calculateGroupProbability(factors, regionData) {
     } else {
       console.log(`❌ Фактор "${factor}" не сработал`);
     }
+
+    // Сохраняем данные по фактору
+    factorsData[factor] = {
+      triggered: isTriggered,
+      value: isTriggered ? 1 : 0, // 1 если сработал, 0 если нет
+      reason: triggerReason || 'Не определено',
+      currentValue: current,
+      prevValue: prev,
+      currentKey,
+      prevKey
+    };
   });
 
   const groupProbability = totalFactors > 0 ? triggeredFactors / totalFactors : 0;
   console.log(`🎯 Итог по группе: ${triggeredFactors}/${totalFactors} = ${groupProbability}`);
   
-  return groupProbability;
+  return {
+    probability: groupProbability,
+    triggeredFactors,
+    totalFactors,
+    factors: factorsData,
+    ratio: `${triggeredFactors}/${totalFactors}`
+  };
 }
-function calcProtestVer(regionName,regionData) {
-  const verDat = useDataStoreVer()
+
+function calcProtestVer(regionName, regionData) {
+  const verDat = useDataStoreVer();
+  
   // Группируем факторы по категориям
-  const groups = createProtestGroups();;
-  // Рассчитываем вероятность для каждой группы
+  const groups = createProtestGroups();
+  
+  // Рассчитываем вероятность для каждой группы с деталями
   const groupProbabilities = {};
   Object.entries(groups).forEach(([category, factors]) => {
-    const probability = calculateGroupProbability(factors, regionData);
-    groupProbabilities[category] = probability;
-    console.log(`Вероятность для группы "${category}":`, probability);
+    const groupResult = calculateGroupProbability(factors, regionData);
+    groupProbabilities[category] = groupResult;
+    console.log(`Вероятность для группы "${category}":`, groupResult.probability);
   });
 
   // Применяем формулу полной вероятности для независимых событий
-  // P(Протест) = 1 - ∏(1 - P(A_i))
   let probabilityNoProtest = 1;
-
   Object.values(groupProbabilities).forEach(groupProb => {
-    probabilityNoProtest *= (1 - groupProb);
-    console.log('probabilityNoProtest',probabilityNoProtest)
+    probabilityNoProtest *= (1 - groupProb.probability);
+    console.log('probabilityNoProtest', probabilityNoProtest);
   });
 
   const finalProbability = 1 - probabilityNoProtest;
 
   console.log('Вероятности по группам:', groupProbabilities);
-  verDat.setData(regionName,groupProbabilities)
+  
+  // Создаем структурированные данные для хранения
+  const structuredData = {};
+  
+  Object.entries(groupProbabilities).forEach(([category, groupData]) => {
+    // Создаем объект для группы с общей вероятностью и деталями по факторам
+    structuredData[category] = {
+      probability: groupData.probability, // Общая вероятность группы
+      factors: groupData.factors,         // Детали по каждому фактору
+      triggeredFactors: groupData.triggeredFactors,
+      totalFactors: groupData.totalFactors,
+      ratio: groupData.ratio
+    };
+  });
+
+  // Добавляем общую вероятность протеста
+  structuredData.totalProbability = Math.round(finalProbability * 100) / 100;
+  
+  // Сохраняем структурированные данные
+  verDat.setData(regionName, structuredData);
+  
   console.log('Итоговая вероятность протеста:', finalProbability);
 
-  // Округляем до 2 знаков после запятой
+  // Возвращаем общую вероятность
   return Math.round(finalProbability * 100) / 100;
 }
 
 function addProtestVerToAllRegions(regionsData) {
   Object.entries(regionsData).forEach(([regionName, regionProxy]) => {
-    console.log('regionName',regionName)
-    const ver = calcProtestVer(regionName,regionProxy);
+    console.log('regionName', regionName);
+    const ver = calcProtestVer(regionName, regionProxy);
     regionProxy.ver = ver;
   });
   return regionsData;
