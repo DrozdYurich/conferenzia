@@ -1,5 +1,5 @@
 import apparat from "@/data/apparat";
-
+import useDataStoreVer from "@/store/useDataVeroyatn";
 const CURRENT_YEAR = 2024;
 const PREV_YEAR = CURRENT_YEAR - 1;
 
@@ -243,14 +243,10 @@ function calculateGroupProbability(factors, regionData) {
   
   return groupProbability;
 }
-function calcProtestVer(regionData) {
-  
-  
+function calcProtestVer(regionName,regionData) {
+  const verDat = useDataStoreVer()
   // Группируем факторы по категориям
   const groups = createProtestGroups();;
-
-
-
   // Рассчитываем вероятность для каждой группы
   const groupProbabilities = {};
   Object.entries(groups).forEach(([category, factors]) => {
@@ -271,6 +267,7 @@ function calcProtestVer(regionData) {
   const finalProbability = 1 - probabilityNoProtest;
 
   console.log('Вероятности по группам:', groupProbabilities);
+  verDat.setData(regionName,groupProbabilities)
   console.log('Итоговая вероятность протеста:', finalProbability);
 
   // Округляем до 2 знаков после запятой
@@ -279,7 +276,8 @@ function calcProtestVer(regionData) {
 
 function addProtestVerToAllRegions(regionsData) {
   Object.entries(regionsData).forEach(([regionName, regionProxy]) => {
-    const ver = calcProtestVer(regionProxy);
+    console.log('regionName',regionName)
+    const ver = calcProtestVer(regionName,regionProxy);
     regionProxy.ver = ver;
   });
   return regionsData;

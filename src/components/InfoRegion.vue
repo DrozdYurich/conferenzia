@@ -1,6 +1,7 @@
 <template>
   <div>
     <h2 class="h2">{{ nameregion }} {{ data.federalDistr }}</h2>
+    <StatsContainer :data="result"/>
     <div class="info">
       <div class="accord">
         <AppAccordion />
@@ -24,6 +25,7 @@
 </template>
 
 <script setup>
+import useDataStoreVer from "@/store/useDataVeroyatn";
 import useDataOneRegion from "@/use/UseDataOneRedion";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -34,8 +36,9 @@ import AppAccordion from "./AppAccordion.vue";
 import useApparatStore from "@/store/useApparatStore";
 import { storeToRefs } from "pinia";
 import InfoApparat from "./InfoApparat.vue";
-
+const getData = useDataStoreVer()
 import apparat from "@/data/apparat";
+import StatsContainer from "./StatsContainer.vue";
 const route = useRoute();
 const { getNameFilter, getnameGroup } = storeToRefs(useApparatStore());
 const nameregion = route.params.name;
@@ -43,7 +46,24 @@ const data = computed(() => useDataOneRegion(nameregion));
 const nameMenu = computed(() => {
   return getNameFilter.value;
 });
+console.log('ИНФОРМАЦИЯРЕГИОН',getData.getRegionData(nameregion))
+const result = getData.getRegionData(nameregion);
 
+if (result.exists) {
+  const {
+    "Экономическая детерминация": economicDetermination,
+    "Абсентеистские настроения": absenteeism,
+    "Городская среда": urbanEnvironment,
+    "Действия властей, подрывающие авторитет": governmentActions,
+    "Социальная дифференциация": socialDifferentiation
+  } = result.data;
+
+  console.log(economicDetermination); // 0.75
+  console.log(absenteeism); // 0
+  console.log(urbanEnvironment); // 0.3333333333333333
+  console.log(governmentActions); // 0
+  console.log(socialDifferentiation); // 0.3333333333333333
+}
 const chartKeysAndValues = computed(() => {
   console.log(data.value[0],'data.value[0]')
   console.log(nameMenu.value,'nameMenu.value')
@@ -120,7 +140,7 @@ p {
   width: 98%;
   background-color: var(--contentfon);
   border-radius: 8px;
-  padding: 20px;
+  padding: 45px;
   color: var(--content-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
@@ -139,4 +159,5 @@ p {
   opacity: 0;
   transform: translateX(100px);
 }
+
 </style>
